@@ -4,13 +4,13 @@ This tool extracts every frame of an animated Facebook sticker.
 # Usage
 1. Open a Messenager chat session and send your friend the animated sticker you'd like to extract.
 2. If you want a high DPI sticker zoom in to 200%.
-2. Right-click the sticker you just sent. Click "inspect" and you can see:
+3. Right-click the sticker you just sent. Click "inspect" and you can see:
 
   ![Background Image URL](README-assets/background-url.png)
 
-3. Right-click on that highlighted URL, click "open".
-4. Right-click on the new-opened image, save it under your clone of this repository and name it `sticker.png`
-5. Open that image and take a look. For example:
+4. Right-click on that highlighted URL, click "open".
+5. Right-click on the new-opened image, save it under your clone of this repository and name it `sticker.png`
+6. Open that image and take a look. For example:
 
   ![An example stickerset](README-assets/example-stickers.png)
 
@@ -43,4 +43,4 @@ This tool extracts every frame of an animated Facebook sticker.
   
   Use `./extract.py --help` for advanced options like resizing and adjusting the offset.
 
-6. `$ pip install Pillow; python ./extract.py`. Done!
+7. `$ pip install Pillow; python ./extract.py`. Done!
