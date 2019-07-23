@@ -1,56 +1,49 @@
 #!/usr/bin/env python
 
 import os
+import sys
+import argparse
 from PIL import Image
 
-table = [4, 4, 4, 3]
-stickerPath = "./stickers.png"
-outputDirFull = "./output/full/"
-outputDirSticker = "./output/sticker/"
-outputDirCustom = "./output/custom/"
+parser = argparse.ArgumentParser("Facebook animated sticker to image sequence script")
+parser.add_argument('width', type=int, help="the animation width")
+parser.add_argument('height', type=int, help="the animation height, excluding the last row if it's not complete")
+parser.add_argument('remaining', type=int, help="the remaining animation tiles on the last row")
+parser.add_argument('-os', "--offset", type=int, help="the sticker offset/croppying factor(?)", default=24)
+parser.add_argument('image', help="the input image you want processed")
+parser.add_argument('-o', '--output', help="output directory", default="./output/")
+parser.add_argument('-ox', '--output_width', type=int, help="custom output width", default=0)
+parser.add_argument('-oy', '--output_height', type=int, help="custom output height", default=0)
 
-# Custom-sized
-wantedImageSize = (180, 180)    # The actual image size (px)
-wantedStickerSize = (100, 100)  # The sticker's size in the actual image (px)
+args = parser.parse_args()
 
-###
-
-sticker_width = 288 # (px)
-sticker_height = 288 # (px)
-sticker_offset = 24 # (px)
-
-###
-
-if not os.path.exists(outputDirFull):
-    os.makedirs(outputDirFull)
-if not os.path.exists(outputDirSticker):
-    os.makedirs(outputDirSticker)
-if not os.path.exists(outputDirCustom):
-    os.makedirs(outputDirCustom)
+if not os.path.exists(args.output):
+    os.makedirs(args.output)
 
 
-img = Image.open(stickerPath)
+img = Image.open(args.image)
+
+if args.remaining == 0: 
+    sticker_height = img.height // args.width
+else:
+    sticker_height = img.height // (args.height + 1)
+
+sticker_width = img.width // args.width
+sticker_offset = args.offset
 count = 0
 
-for colIndex, row in enumerate(table):
-    for rowIndex in range(row):
+for colIndex, row in enumerate(range(args.height + 1)):
+    if row == args.height:
+        rows = args.remaining
+    else:
+        rows = args.height
+    for rowIndex in range(rows):
         count += 1
         cropped = img.crop((sticker_offset   + sticker_width  *  rowIndex, # left
                             sticker_offset   + sticker_height *  colIndex, # up
-                            - sticker_offset + sticker_width  * (rowIndex + 1), # right
-                            - sticker_offset + sticker_height * (colIndex + 1))) # down
+                            (-sticker_offset) + sticker_width  * (rowIndex + 1), # right
+                            (-sticker_offset) + sticker_height * (colIndex + 1))) # down
 
-        # Full-sized version
-        cropped.save(outputDirFull + str(count) + ".png")
-
-        # Sticker-sized version
-        cropped.thumbnail((120, 120))
-        cropped.save(outputDirSticker + str(count) + ".png")
-
-        # Custom-sized version
-        offset_width = (wantedImageSize[0] - wantedStickerSize[0]) / 2
-        offset_height = (wantedImageSize[1] - wantedStickerSize[1]) / 2
-        cropped.thumbnail(wantedStickerSize)
-        new = Image.new("RGBA", wantedImageSize, (0, 0, 0, 0))
-        new.paste(cropped, (offset_width, offset_height))
-        new.save(outputDirCustom + str(count) + ".png")
+        if args.output_width != 0 and args.output_height != 0:
+            cropped.thumbnail((args.output_width, args.output_height))
+        cropped.save(args.output + "{:03d}.png".format(count))
